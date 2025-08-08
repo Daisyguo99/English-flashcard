@@ -1,0 +1,2212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Native English · 极简搭配学习</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #111827;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --accent: #60a5fa;
+    --accent2: #34d399;
+    --card: #0b1220;
+    --cardBorder: #1f2937;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    background: linear-gradient(180deg, #0b1020, #0f172a 30%);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex; 
+    flex-direction: column;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px clamp(16px, 4vw, 28px);
+    border-bottom: 1px solid #1f2937;
+    background: rgba(17,24,39,0.6);
+    backdrop-filter: blur(8px);
+    position: sticky; top: 0; z-index: 10;
+  }
+  header h1 {
+    margin: 0; font-size: clamp(18px, 2.8vw, 22px); letter-spacing: .3px;
+    display:flex; gap:10px; align-items:center;
+  }
+  .tag { 
+    font-size: 12px; padding: 2px 8px; border: 1px solid #374151; border-radius: 99px; color: var(--muted);
+  }
+  .controls {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  }
+  select, button, input[type="checkbox"] {
+    background: #0b1220; border: 1px solid #243244; color: var(--text);
+    border-radius: 8px; padding: 10px 12px; font-size: 14px;
+  }
+  button {
+    cursor: pointer; border: 1px solid #2b3b53;
+  }
+  button.primary { border-color: #2563eb; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  main {
+    display: grid; grid-template-columns: 280px 1fr; gap: 16px;
+    padding: 20px clamp(16px, 4vw, 28px);
+  }
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+  }
+  aside {
+    background: rgba(17,24,39,0.45); border: 1px solid #162034;
+    border-radius: 14px; padding: 16px;
+  }
+  .topic-list { display: grid; gap: 8px; margin-top: 8px; }
+  .topic-item {
+    display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid #1e293b;
+    border-radius: 10px; background: #0b1220; cursor: pointer;
+  }
+  .topic-item.active, .topic-item:hover { border-color: #3b82f6; background: linear-gradient(180deg,#0b1220,#0f1a2e); }
+  .progress {
+    height: 8px; background: #111827; border: 1px solid #1f2937; border-radius: 999px; overflow: hidden;
+    margin-top: 8px;
+  }
+  .progress > div { height: 100%; background: linear-gradient(90deg,var(--accent), var(--accent2)); width: 0%; }
+  .grid {
+    display: grid; gap: 16px;
+    grid-template-columns: 1fr;
+  }
+  .card {
+    border: 1px solid var(--cardBorder); background: radial-gradient(1200px 400px at 10% -10%, #111a2e, #0b1220);
+    border-radius: 16px; padding: clamp(16px,3vw,24px);
+    min-height: 220px; display: flex; flex-direction: column; justify-content: space-between;
+    box-shadow: 0 10px 40px rgba(0,0,0,.35);
+  }
+  .phrase {
+    font-size: clamp(22px, 3vw, 28px); font-weight: 700; letter-spacing:.25px;
+  }
+  .ipa { color: var(--muted); font-size: 13px; }
+  .meaning { margin: 6px 0 8px; color: #cbd5e1; }
+  .eg { color: #9fb0c7; margin: 6px 0; }
+  .chips { display:flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .chip { font-size: 12px; padding: 4px 8px; border:1px solid #234; border-radius: 999px; color: #9fb0c7; }
+  .actions { display:flex; gap: 8px; flex-wrap: wrap; }
+  .muted { color: var(--muted); font-size: 12px; }
+  .row { display:flex; gap: 10px; align-items:center; flex-wrap:wrap; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; padding: 16px; }
+  .hint { color:#93c5fd; font-size:12px; }
+  .tiny { font-size: 11px; color:#7392b5 }
+</style>
+</head>
+<body>
+<header>
+  <h1>Native English · 搭配学习 <span class="tag">极简版</span></h1>
+  <div class="controls">
+    <select id="topicSelect" title="选择主题"></select>
+    <button id="shuffleBtn" title="打乱顺序">Shuffle</button>
+    <button id="reviewToggle" title="只看未掌握">仅看未掌握</button>
+    <button id="ttsBtn" title="发音 (试验)">🔊 发音</button>
+  </div>
+</header>
+
+<main>
+  <aside>
+    <div class="row" style="justify-content:space-between;">
+      <div>
+        <div class="muted">学习主题</div>
+        <div id="topicName" style="font-weight:600;margin-top:2px;">—</div>
+      </div>
+      <div class="tiny" id="counter">0 / 0</div>
+    </div>
+    <div class="progress" aria-label="progress"><div id="progressBar"></div></div>
+    <div class="topic-list" id="topicList"></div>
+  </aside>
+
+  <section class="grid">
+    <div class="card" id="card">
+      <div>
+        <div class="phrase" id="front">—</div>
+        <div class="ipa" id="ipa"></div>
+        <div class="meaning" id="meaning"></div>
+        <div class="eg" id="eg"></div>
+        <div class="chips" id="chips"></div>
+      </div>
+      <div class="row">
+        <div class="actions">
+          <button class="primary" id="flipBtn">显示/隐藏 释义</button>
+          <button id="againBtn">Again</button>
+          <button id="gotItBtn">I knew it ✔</button>
+          <button id="nextBtn">Next →</button>
+        </div>
+        <span class="hint">提示：按空格翻转，左右方向键切换</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="muted">如何添加你自己的内容？</div>
+      <div style="color:#cbd5e1">
+        打开本文件，搜索 <code>const DATA =</code>，按示例添加更多 <b>topic</b> 和 <b>phrases</b>。
+        每条包含：<code>text</code>（短语）、<code>cn</code>（中文释义）、<code>eg</code>（例句）、可选 <code>tags</code>、<code>ipa</code>。
+      </div>
+      <div class="tiny">本地保存：掌握进度会保存在浏览器的 localStorage（仅此设备）。</div>
+    </div>
+  </section>
+</main>
+
+<footer>Made for rapid practice · 单文件离线可用</footer>
+
+<script>
+// ======== 数据：可按格式自行扩展 ========
+const DATA = [
+  {
+    "topic": "Daily Life",
+    "items": [
+      {
+        "text": "tidy up",
+        "cn": "模拟释义：tidy up",
+        "eg": "I need to tidy up before the guests arrive.",
+        "tags": "daily life"
+      },
+      {
+        "text": "wind down",
+        "cn": "模拟释义：wind down",
+        "eg": "She likes to wind down with a cup of tea after work.",
+        "tags": "daily life"
+      },
+      {
+        "text": "get around to",
+        "cn": "模拟释义：变得 around to",
+        "eg": "I never got around to replying to that email.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind",
+        "cn": "模拟释义：slip 某人的 mind",
+        "eg": "Sorry I forgot—it completely slipped my mind.",
+        "tags": "daily life"
+      },
+      {
+        "text": "get around to soon",
+        "cn": "模拟释义：变得 around to（扩展）",
+        "eg": "I never got around to replying to that email again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "tidy up soon",
+        "cn": "模拟释义：tidy up（扩展）",
+        "eg": "I need to tidy up before the guests arrive again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "tidy up again",
+        "cn": "模拟释义：tidy up（扩展）",
+        "eg": "I need to tidy up before the guests arrive again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "tidy up again",
+        "cn": "模拟释义：tidy up（扩展）",
+        "eg": "I need to tidy up before the guests arrive again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "get around to again",
+        "cn": "模拟释义：变得 around to（扩展）",
+        "eg": "I never got around to replying to that email again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "get around to again",
+        "cn": "模拟释义：变得 around to（扩展）",
+        "eg": "I never got around to replying to that email again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "get around to soon",
+        "cn": "模拟释义：变得 around to（扩展）",
+        "eg": "I never got around to replying to that email again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind more",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind more",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "get around to more",
+        "cn": "模拟释义：变得 around to（扩展）",
+        "eg": "I never got around to replying to that email again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind more",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "tidy up soon",
+        "cn": "模拟释义：tidy up（扩展）",
+        "eg": "I need to tidy up before the guests arrive again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind more",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "tidy up again",
+        "cn": "模拟释义：tidy up（扩展）",
+        "eg": "I need to tidy up before the guests arrive again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "wind down soon",
+        "cn": "模拟释义：wind down（扩展）",
+        "eg": "She likes to wind down with a cup of tea after work again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "wind down more",
+        "cn": "模拟释义：wind down（扩展）",
+        "eg": "She likes to wind down with a cup of tea after work again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "get around to again",
+        "cn": "模拟释义：变得 around to（扩展）",
+        "eg": "I never got around to replying to that email again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "get around to more",
+        "cn": "模拟释义：变得 around to（扩展）",
+        "eg": "I never got around to replying to that email again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind soon",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "tidy up more",
+        "cn": "模拟释义：tidy up（扩展）",
+        "eg": "I need to tidy up before the guests arrive again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind soon",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind soon",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind soon",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind soon",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "wind down more",
+        "cn": "模拟释义：wind down（扩展）",
+        "eg": "She likes to wind down with a cup of tea after work again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "tidy up more",
+        "cn": "模拟释义：tidy up（扩展）",
+        "eg": "I need to tidy up before the guests arrive again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "get around to again",
+        "cn": "模拟释义：变得 around to（扩展）",
+        "eg": "I never got around to replying to that email again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "get around to more",
+        "cn": "模拟释义：变得 around to（扩展）",
+        "eg": "I never got around to replying to that email again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind again",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "wind down soon",
+        "cn": "模拟释义：wind down（扩展）",
+        "eg": "She likes to wind down with a cup of tea after work again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind more",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind soon",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind more",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "wind down soon",
+        "cn": "模拟释义：wind down（扩展）",
+        "eg": "She likes to wind down with a cup of tea after work again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "tidy up soon",
+        "cn": "模拟释义：tidy up（扩展）",
+        "eg": "I need to tidy up before the guests arrive again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "tidy up more",
+        "cn": "模拟释义：tidy up（扩展）",
+        "eg": "I need to tidy up before the guests arrive again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind more",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "tidy up again",
+        "cn": "模拟释义：tidy up（扩展）",
+        "eg": "I need to tidy up before the guests arrive again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "wind down more",
+        "cn": "模拟释义：wind down（扩展）",
+        "eg": "She likes to wind down with a cup of tea after work again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind more",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "get around to soon",
+        "cn": "模拟释义：变得 around to（扩展）",
+        "eg": "I never got around to replying to that email again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "wind down more",
+        "cn": "模拟释义：wind down（扩展）",
+        "eg": "She likes to wind down with a cup of tea after work again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind soon",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "wind down again",
+        "cn": "模拟释义：wind down（扩展）",
+        "eg": "She likes to wind down with a cup of tea after work again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "wind down soon",
+        "cn": "模拟释义：wind down（扩展）",
+        "eg": "She likes to wind down with a cup of tea after work again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind more",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "get around to soon",
+        "cn": "模拟释义：变得 around to（扩展）",
+        "eg": "I never got around to replying to that email again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "wind down soon",
+        "cn": "模拟释义：wind down（扩展）",
+        "eg": "She likes to wind down with a cup of tea after work again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "wind down again",
+        "cn": "模拟释义：wind down（扩展）",
+        "eg": "She likes to wind down with a cup of tea after work again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind again",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind soon",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "slip one's mind soon",
+        "cn": "模拟释义：slip 某人的 mind（扩展）",
+        "eg": "Sorry I forgot—it completely slipped my mind again.",
+        "tags": "daily life"
+      },
+      {
+        "text": "tidy up more",
+        "cn": "模拟释义：tidy up（扩展）",
+        "eg": "I need to tidy up before the guests arrive again.",
+        "tags": "daily life"
+      }
+    ]
+  },
+  {
+    "topic": "Workplace",
+    "items": [
+      {
+        "text": "follow up on",
+        "cn": "模拟释义：follow up on",
+        "eg": "Can you follow up on that request by Friday?",
+        "tags": "workplace"
+      },
+      {
+        "text": "loop someone in",
+        "cn": "模拟释义：loop someone in",
+        "eg": "Loop me in on that conversation, please.",
+        "tags": "workplace"
+      },
+      {
+        "text": "push back on",
+        "cn": "模拟释义：push back on",
+        "eg": "She pushed back on the manager's suggestion.",
+        "tags": "workplace"
+      },
+      {
+        "text": "touch base",
+        "cn": "模拟释义：touch base",
+        "eg": "Let’s touch base next week to finalize the plan.",
+        "tags": "workplace"
+      },
+      {
+        "text": "touch base soon",
+        "cn": "模拟释义：touch base（扩展）",
+        "eg": "Let’s touch base next week to finalize the plan again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "push back on again",
+        "cn": "模拟释义：push back on（扩展）",
+        "eg": "She pushed back on the manager's suggestion again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "follow up on soon",
+        "cn": "模拟释义：follow up on（扩展）",
+        "eg": "Can you follow up on that request by Friday?",
+        "tags": "workplace"
+      },
+      {
+        "text": "follow up on again",
+        "cn": "模拟释义：follow up on（扩展）",
+        "eg": "Can you follow up on that request by Friday?",
+        "tags": "workplace"
+      },
+      {
+        "text": "push back on soon",
+        "cn": "模拟释义：push back on（扩展）",
+        "eg": "She pushed back on the manager's suggestion again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "loop someone in more",
+        "cn": "模拟释义：loop someone in（扩展）",
+        "eg": "Loop me in on that conversation, please again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "touch base more",
+        "cn": "模拟释义：touch base（扩展）",
+        "eg": "Let’s touch base next week to finalize the plan again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "touch base again",
+        "cn": "模拟释义：touch base（扩展）",
+        "eg": "Let’s touch base next week to finalize the plan again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "loop someone in soon",
+        "cn": "模拟释义：loop someone in（扩展）",
+        "eg": "Loop me in on that conversation, please again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "follow up on soon",
+        "cn": "模拟释义：follow up on（扩展）",
+        "eg": "Can you follow up on that request by Friday?",
+        "tags": "workplace"
+      },
+      {
+        "text": "follow up on more",
+        "cn": "模拟释义：follow up on（扩展）",
+        "eg": "Can you follow up on that request by Friday?",
+        "tags": "workplace"
+      },
+      {
+        "text": "loop someone in again",
+        "cn": "模拟释义：loop someone in（扩展）",
+        "eg": "Loop me in on that conversation, please again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "push back on more",
+        "cn": "模拟释义：push back on（扩展）",
+        "eg": "She pushed back on the manager's suggestion again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "touch base soon",
+        "cn": "模拟释义：touch base（扩展）",
+        "eg": "Let’s touch base next week to finalize the plan again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "touch base soon",
+        "cn": "模拟释义：touch base（扩展）",
+        "eg": "Let’s touch base next week to finalize the plan again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "touch base soon",
+        "cn": "模拟释义：touch base（扩展）",
+        "eg": "Let’s touch base next week to finalize the plan again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "push back on more",
+        "cn": "模拟释义：push back on（扩展）",
+        "eg": "She pushed back on the manager's suggestion again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "touch base again",
+        "cn": "模拟释义：touch base（扩展）",
+        "eg": "Let’s touch base next week to finalize the plan again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "push back on again",
+        "cn": "模拟释义：push back on（扩展）",
+        "eg": "She pushed back on the manager's suggestion again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "follow up on soon",
+        "cn": "模拟释义：follow up on（扩展）",
+        "eg": "Can you follow up on that request by Friday?",
+        "tags": "workplace"
+      },
+      {
+        "text": "loop someone in more",
+        "cn": "模拟释义：loop someone in（扩展）",
+        "eg": "Loop me in on that conversation, please again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "loop someone in again",
+        "cn": "模拟释义：loop someone in（扩展）",
+        "eg": "Loop me in on that conversation, please again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "push back on soon",
+        "cn": "模拟释义：push back on（扩展）",
+        "eg": "She pushed back on the manager's suggestion again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "loop someone in again",
+        "cn": "模拟释义：loop someone in（扩展）",
+        "eg": "Loop me in on that conversation, please again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "loop someone in more",
+        "cn": "模拟释义：loop someone in（扩展）",
+        "eg": "Loop me in on that conversation, please again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "push back on more",
+        "cn": "模拟释义：push back on（扩展）",
+        "eg": "She pushed back on the manager's suggestion again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "push back on soon",
+        "cn": "模拟释义：push back on（扩展）",
+        "eg": "She pushed back on the manager's suggestion again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "follow up on more",
+        "cn": "模拟释义：follow up on（扩展）",
+        "eg": "Can you follow up on that request by Friday?",
+        "tags": "workplace"
+      },
+      {
+        "text": "touch base soon",
+        "cn": "模拟释义：touch base（扩展）",
+        "eg": "Let’s touch base next week to finalize the plan again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "loop someone in soon",
+        "cn": "模拟释义：loop someone in（扩展）",
+        "eg": "Loop me in on that conversation, please again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "loop someone in again",
+        "cn": "模拟释义：loop someone in（扩展）",
+        "eg": "Loop me in on that conversation, please again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "push back on more",
+        "cn": "模拟释义：push back on（扩展）",
+        "eg": "She pushed back on the manager's suggestion again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "follow up on soon",
+        "cn": "模拟释义：follow up on（扩展）",
+        "eg": "Can you follow up on that request by Friday?",
+        "tags": "workplace"
+      },
+      {
+        "text": "loop someone in again",
+        "cn": "模拟释义：loop someone in（扩展）",
+        "eg": "Loop me in on that conversation, please again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "follow up on again",
+        "cn": "模拟释义：follow up on（扩展）",
+        "eg": "Can you follow up on that request by Friday?",
+        "tags": "workplace"
+      },
+      {
+        "text": "touch base more",
+        "cn": "模拟释义：touch base（扩展）",
+        "eg": "Let’s touch base next week to finalize the plan again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "loop someone in more",
+        "cn": "模拟释义：loop someone in（扩展）",
+        "eg": "Loop me in on that conversation, please again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "follow up on soon",
+        "cn": "模拟释义：follow up on（扩展）",
+        "eg": "Can you follow up on that request by Friday?",
+        "tags": "workplace"
+      },
+      {
+        "text": "follow up on more",
+        "cn": "模拟释义：follow up on（扩展）",
+        "eg": "Can you follow up on that request by Friday?",
+        "tags": "workplace"
+      },
+      {
+        "text": "follow up on again",
+        "cn": "模拟释义：follow up on（扩展）",
+        "eg": "Can you follow up on that request by Friday?",
+        "tags": "workplace"
+      },
+      {
+        "text": "loop someone in again",
+        "cn": "模拟释义：loop someone in（扩展）",
+        "eg": "Loop me in on that conversation, please again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "loop someone in soon",
+        "cn": "模拟释义：loop someone in（扩展）",
+        "eg": "Loop me in on that conversation, please again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "follow up on soon",
+        "cn": "模拟释义：follow up on（扩展）",
+        "eg": "Can you follow up on that request by Friday?",
+        "tags": "workplace"
+      },
+      {
+        "text": "loop someone in again",
+        "cn": "模拟释义：loop someone in（扩展）",
+        "eg": "Loop me in on that conversation, please again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "push back on more",
+        "cn": "模拟释义：push back on（扩展）",
+        "eg": "She pushed back on the manager's suggestion again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "loop someone in soon",
+        "cn": "模拟释义：loop someone in（扩展）",
+        "eg": "Loop me in on that conversation, please again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "follow up on soon",
+        "cn": "模拟释义：follow up on（扩展）",
+        "eg": "Can you follow up on that request by Friday?",
+        "tags": "workplace"
+      },
+      {
+        "text": "push back on soon",
+        "cn": "模拟释义：push back on（扩展）",
+        "eg": "She pushed back on the manager's suggestion again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "loop someone in again",
+        "cn": "模拟释义：loop someone in（扩展）",
+        "eg": "Loop me in on that conversation, please again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "follow up on more",
+        "cn": "模拟释义：follow up on（扩展）",
+        "eg": "Can you follow up on that request by Friday?",
+        "tags": "workplace"
+      },
+      {
+        "text": "touch base again",
+        "cn": "模拟释义：touch base（扩展）",
+        "eg": "Let’s touch base next week to finalize the plan again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "touch base again",
+        "cn": "模拟释义：touch base（扩展）",
+        "eg": "Let’s touch base next week to finalize the plan again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "follow up on soon",
+        "cn": "模拟释义：follow up on（扩展）",
+        "eg": "Can you follow up on that request by Friday?",
+        "tags": "workplace"
+      },
+      {
+        "text": "touch base soon",
+        "cn": "模拟释义：touch base（扩展）",
+        "eg": "Let’s touch base next week to finalize the plan again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "push back on again",
+        "cn": "模拟释义：push back on（扩展）",
+        "eg": "She pushed back on the manager's suggestion again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "follow up on soon",
+        "cn": "模拟释义：follow up on（扩展）",
+        "eg": "Can you follow up on that request by Friday?",
+        "tags": "workplace"
+      },
+      {
+        "text": "push back on again",
+        "cn": "模拟释义：push back on（扩展）",
+        "eg": "She pushed back on the manager's suggestion again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "push back on more",
+        "cn": "模拟释义：push back on（扩展）",
+        "eg": "She pushed back on the manager's suggestion again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "touch base more",
+        "cn": "模拟释义：touch base（扩展）",
+        "eg": "Let’s touch base next week to finalize the plan again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "follow up on more",
+        "cn": "模拟释义：follow up on（扩展）",
+        "eg": "Can you follow up on that request by Friday?",
+        "tags": "workplace"
+      },
+      {
+        "text": "touch base again",
+        "cn": "模拟释义：touch base（扩展）",
+        "eg": "Let’s touch base next week to finalize the plan again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "touch base soon",
+        "cn": "模拟释义：touch base（扩展）",
+        "eg": "Let’s touch base next week to finalize the plan again.",
+        "tags": "workplace"
+      },
+      {
+        "text": "touch base again",
+        "cn": "模拟释义：touch base（扩展）",
+        "eg": "Let’s touch base next week to finalize the plan again.",
+        "tags": "workplace"
+      }
+    ]
+  },
+  {
+    "topic": "Interview",
+    "items": [
+      {
+        "text": "play to one's strengths",
+        "cn": "模拟释义：play to 某人的 strengths",
+        "eg": "He played to his strengths in the interview.",
+        "tags": "interview"
+      },
+      {
+        "text": "speak volumes",
+        "cn": "模拟释义：speak volumes",
+        "eg": "Your silence speaks volumes.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet",
+        "cn": "模拟释义：think on 某人的 feet",
+        "eg": "You need to think on your feet in this job.",
+        "tags": "interview"
+      },
+      {
+        "text": "wear many hats",
+        "cn": "模拟释义：wear many hats",
+        "eg": "Startups often require you to wear many hats.",
+        "tags": "interview"
+      },
+      {
+        "text": "speak volumes soon",
+        "cn": "模拟释义：speak volumes（扩展）",
+        "eg": "Your silence speaks volumes again.",
+        "tags": "interview"
+      },
+      {
+        "text": "play to one's strengths soon",
+        "cn": "模拟释义：play to 某人的 strengths（扩展）",
+        "eg": "He played to his strengths in the interview again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet again",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "wear many hats again",
+        "cn": "模拟释义：wear many hats（扩展）",
+        "eg": "Startups often require you to wear many hats again.",
+        "tags": "interview"
+      },
+      {
+        "text": "speak volumes soon",
+        "cn": "模拟释义：speak volumes（扩展）",
+        "eg": "Your silence speaks volumes again.",
+        "tags": "interview"
+      },
+      {
+        "text": "wear many hats again",
+        "cn": "模拟释义：wear many hats（扩展）",
+        "eg": "Startups often require you to wear many hats again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet soon",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet soon",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "wear many hats more",
+        "cn": "模拟释义：wear many hats（扩展）",
+        "eg": "Startups often require you to wear many hats again.",
+        "tags": "interview"
+      },
+      {
+        "text": "wear many hats more",
+        "cn": "模拟释义：wear many hats（扩展）",
+        "eg": "Startups often require you to wear many hats again.",
+        "tags": "interview"
+      },
+      {
+        "text": "wear many hats again",
+        "cn": "模拟释义：wear many hats（扩展）",
+        "eg": "Startups often require you to wear many hats again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet again",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "play to one's strengths again",
+        "cn": "模拟释义：play to 某人的 strengths（扩展）",
+        "eg": "He played to his strengths in the interview again.",
+        "tags": "interview"
+      },
+      {
+        "text": "play to one's strengths soon",
+        "cn": "模拟释义：play to 某人的 strengths（扩展）",
+        "eg": "He played to his strengths in the interview again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet again",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "wear many hats soon",
+        "cn": "模拟释义：wear many hats（扩展）",
+        "eg": "Startups often require you to wear many hats again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet again",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet again",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet more",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet again",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet again",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet more",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "speak volumes soon",
+        "cn": "模拟释义：speak volumes（扩展）",
+        "eg": "Your silence speaks volumes again.",
+        "tags": "interview"
+      },
+      {
+        "text": "play to one's strengths more",
+        "cn": "模拟释义：play to 某人的 strengths（扩展）",
+        "eg": "He played to his strengths in the interview again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet soon",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "speak volumes again",
+        "cn": "模拟释义：speak volumes（扩展）",
+        "eg": "Your silence speaks volumes again.",
+        "tags": "interview"
+      },
+      {
+        "text": "speak volumes again",
+        "cn": "模拟释义：speak volumes（扩展）",
+        "eg": "Your silence speaks volumes again.",
+        "tags": "interview"
+      },
+      {
+        "text": "play to one's strengths again",
+        "cn": "模拟释义：play to 某人的 strengths（扩展）",
+        "eg": "He played to his strengths in the interview again.",
+        "tags": "interview"
+      },
+      {
+        "text": "play to one's strengths more",
+        "cn": "模拟释义：play to 某人的 strengths（扩展）",
+        "eg": "He played to his strengths in the interview again.",
+        "tags": "interview"
+      },
+      {
+        "text": "play to one's strengths soon",
+        "cn": "模拟释义：play to 某人的 strengths（扩展）",
+        "eg": "He played to his strengths in the interview again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet again",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet soon",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "play to one's strengths more",
+        "cn": "模拟释义：play to 某人的 strengths（扩展）",
+        "eg": "He played to his strengths in the interview again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet more",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "speak volumes soon",
+        "cn": "模拟释义：speak volumes（扩展）",
+        "eg": "Your silence speaks volumes again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet again",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "speak volumes soon",
+        "cn": "模拟释义：speak volumes（扩展）",
+        "eg": "Your silence speaks volumes again.",
+        "tags": "interview"
+      },
+      {
+        "text": "speak volumes soon",
+        "cn": "模拟释义：speak volumes（扩展）",
+        "eg": "Your silence speaks volumes again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet soon",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "wear many hats more",
+        "cn": "模拟释义：wear many hats（扩展）",
+        "eg": "Startups often require you to wear many hats again.",
+        "tags": "interview"
+      },
+      {
+        "text": "wear many hats soon",
+        "cn": "模拟释义：wear many hats（扩展）",
+        "eg": "Startups often require you to wear many hats again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet more",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "wear many hats again",
+        "cn": "模拟释义：wear many hats（扩展）",
+        "eg": "Startups often require you to wear many hats again.",
+        "tags": "interview"
+      },
+      {
+        "text": "play to one's strengths soon",
+        "cn": "模拟释义：play to 某人的 strengths（扩展）",
+        "eg": "He played to his strengths in the interview again.",
+        "tags": "interview"
+      },
+      {
+        "text": "speak volumes again",
+        "cn": "模拟释义：speak volumes（扩展）",
+        "eg": "Your silence speaks volumes again.",
+        "tags": "interview"
+      },
+      {
+        "text": "think on one's feet again",
+        "cn": "模拟释义：think on 某人的 feet（扩展）",
+        "eg": "You need to think on your feet in this job again.",
+        "tags": "interview"
+      },
+      {
+        "text": "play to one's strengths more",
+        "cn": "模拟释义：play to 某人的 strengths（扩展）",
+        "eg": "He played to his strengths in the interview again.",
+        "tags": "interview"
+      },
+      {
+        "text": "play to one's strengths again",
+        "cn": "模拟释义：play to 某人的 strengths（扩展）",
+        "eg": "He played to his strengths in the interview again.",
+        "tags": "interview"
+      }
+    ]
+  },
+  {
+    "topic": "Health & Yoga",
+    "items": [
+      {
+        "text": "breathe deeply",
+        "cn": "模拟释义：breathe deeply",
+        "eg": "Take a moment to breathe deeply and relax.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "hold the pose",
+        "cn": "模拟释义：hold the pose",
+        "eg": "Hold the pose for five deep breaths.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stretch it out",
+        "cn": "模拟释义：stretch it out",
+        "eg": "Let's stretch it out before cooling down.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stay centered",
+        "cn": "模拟释义：stay centered",
+        "eg": "This pose helps you stay centered and calm.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stay centered again",
+        "cn": "模拟释义：stay centered（扩展）",
+        "eg": "This pose helps you stay centered and calm again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "hold the pose again",
+        "cn": "模拟释义：hold the pose（扩展）",
+        "eg": "Hold the pose for five deep breaths again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stretch it out soon",
+        "cn": "模拟释义：stretch it out（扩展）",
+        "eg": "Let's stretch it out before cooling down again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stretch it out soon",
+        "cn": "模拟释义：stretch it out（扩展）",
+        "eg": "Let's stretch it out before cooling down again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stay centered more",
+        "cn": "模拟释义：stay centered（扩展）",
+        "eg": "This pose helps you stay centered and calm again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "breathe deeply again",
+        "cn": "模拟释义：breathe deeply（扩展）",
+        "eg": "Take a moment to breathe deeply and relax again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stretch it out again",
+        "cn": "模拟释义：stretch it out（扩展）",
+        "eg": "Let's stretch it out before cooling down again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stretch it out more",
+        "cn": "模拟释义：stretch it out（扩展）",
+        "eg": "Let's stretch it out before cooling down again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "hold the pose again",
+        "cn": "模拟释义：hold the pose（扩展）",
+        "eg": "Hold the pose for five deep breaths again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stay centered soon",
+        "cn": "模拟释义：stay centered（扩展）",
+        "eg": "This pose helps you stay centered and calm again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stay centered more",
+        "cn": "模拟释义：stay centered（扩展）",
+        "eg": "This pose helps you stay centered and calm again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "breathe deeply again",
+        "cn": "模拟释义：breathe deeply（扩展）",
+        "eg": "Take a moment to breathe deeply and relax again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "hold the pose again",
+        "cn": "模拟释义：hold the pose（扩展）",
+        "eg": "Hold the pose for five deep breaths again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stay centered again",
+        "cn": "模拟释义：stay centered（扩展）",
+        "eg": "This pose helps you stay centered and calm again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stay centered more",
+        "cn": "模拟释义：stay centered（扩展）",
+        "eg": "This pose helps you stay centered and calm again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stretch it out more",
+        "cn": "模拟释义：stretch it out（扩展）",
+        "eg": "Let's stretch it out before cooling down again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "breathe deeply more",
+        "cn": "模拟释义：breathe deeply（扩展）",
+        "eg": "Take a moment to breathe deeply and relax again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "breathe deeply more",
+        "cn": "模拟释义：breathe deeply（扩展）",
+        "eg": "Take a moment to breathe deeply and relax again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stretch it out again",
+        "cn": "模拟释义：stretch it out（扩展）",
+        "eg": "Let's stretch it out before cooling down again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "breathe deeply soon",
+        "cn": "模拟释义：breathe deeply（扩展）",
+        "eg": "Take a moment to breathe deeply and relax again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "hold the pose soon",
+        "cn": "模拟释义：hold the pose（扩展）",
+        "eg": "Hold the pose for five deep breaths again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "hold the pose again",
+        "cn": "模拟释义：hold the pose（扩展）",
+        "eg": "Hold the pose for five deep breaths again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stay centered more",
+        "cn": "模拟释义：stay centered（扩展）",
+        "eg": "This pose helps you stay centered and calm again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stay centered more",
+        "cn": "模拟释义：stay centered（扩展）",
+        "eg": "This pose helps you stay centered and calm again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "hold the pose soon",
+        "cn": "模拟释义：hold the pose（扩展）",
+        "eg": "Hold the pose for five deep breaths again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "breathe deeply soon",
+        "cn": "模拟释义：breathe deeply（扩展）",
+        "eg": "Take a moment to breathe deeply and relax again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "hold the pose more",
+        "cn": "模拟释义：hold the pose（扩展）",
+        "eg": "Hold the pose for five deep breaths again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "hold the pose again",
+        "cn": "模拟释义：hold the pose（扩展）",
+        "eg": "Hold the pose for five deep breaths again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "breathe deeply soon",
+        "cn": "模拟释义：breathe deeply（扩展）",
+        "eg": "Take a moment to breathe deeply and relax again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "breathe deeply soon",
+        "cn": "模拟释义：breathe deeply（扩展）",
+        "eg": "Take a moment to breathe deeply and relax again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stretch it out more",
+        "cn": "模拟释义：stretch it out（扩展）",
+        "eg": "Let's stretch it out before cooling down again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "breathe deeply again",
+        "cn": "模拟释义：breathe deeply（扩展）",
+        "eg": "Take a moment to breathe deeply and relax again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stretch it out more",
+        "cn": "模拟释义：stretch it out（扩展）",
+        "eg": "Let's stretch it out before cooling down again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stretch it out again",
+        "cn": "模拟释义：stretch it out（扩展）",
+        "eg": "Let's stretch it out before cooling down again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stretch it out again",
+        "cn": "模拟释义：stretch it out（扩展）",
+        "eg": "Let's stretch it out before cooling down again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "breathe deeply soon",
+        "cn": "模拟释义：breathe deeply（扩展）",
+        "eg": "Take a moment to breathe deeply and relax again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stretch it out soon",
+        "cn": "模拟释义：stretch it out（扩展）",
+        "eg": "Let's stretch it out before cooling down again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "breathe deeply again",
+        "cn": "模拟释义：breathe deeply（扩展）",
+        "eg": "Take a moment to breathe deeply and relax again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "breathe deeply more",
+        "cn": "模拟释义：breathe deeply（扩展）",
+        "eg": "Take a moment to breathe deeply and relax again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "hold the pose more",
+        "cn": "模拟释义：hold the pose（扩展）",
+        "eg": "Hold the pose for five deep breaths again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "hold the pose soon",
+        "cn": "模拟释义：hold the pose（扩展）",
+        "eg": "Hold the pose for five deep breaths again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stretch it out soon",
+        "cn": "模拟释义：stretch it out（扩展）",
+        "eg": "Let's stretch it out before cooling down again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stay centered again",
+        "cn": "模拟释义：stay centered（扩展）",
+        "eg": "This pose helps you stay centered and calm again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "hold the pose again",
+        "cn": "模拟释义：hold the pose（扩展）",
+        "eg": "Hold the pose for five deep breaths again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "breathe deeply soon",
+        "cn": "模拟释义：breathe deeply（扩展）",
+        "eg": "Take a moment to breathe deeply and relax again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "hold the pose again",
+        "cn": "模拟释义：hold the pose（扩展）",
+        "eg": "Hold the pose for five deep breaths again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stretch it out again",
+        "cn": "模拟释义：stretch it out（扩展）",
+        "eg": "Let's stretch it out before cooling down again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "hold the pose more",
+        "cn": "模拟释义：hold the pose（扩展）",
+        "eg": "Hold the pose for five deep breaths again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "breathe deeply soon",
+        "cn": "模拟释义：breathe deeply（扩展）",
+        "eg": "Take a moment to breathe deeply and relax again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "hold the pose again",
+        "cn": "模拟释义：hold the pose（扩展）",
+        "eg": "Hold the pose for five deep breaths again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stay centered again",
+        "cn": "模拟释义：stay centered（扩展）",
+        "eg": "This pose helps you stay centered and calm again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stretch it out again",
+        "cn": "模拟释义：stretch it out（扩展）",
+        "eg": "Let's stretch it out before cooling down again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stay centered soon",
+        "cn": "模拟释义：stay centered（扩展）",
+        "eg": "This pose helps you stay centered and calm again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stay centered more",
+        "cn": "模拟释义：stay centered（扩展）",
+        "eg": "This pose helps you stay centered and calm again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "breathe deeply again",
+        "cn": "模拟释义：breathe deeply（扩展）",
+        "eg": "Take a moment to breathe deeply and relax again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "breathe deeply again",
+        "cn": "模拟释义：breathe deeply（扩展）",
+        "eg": "Take a moment to breathe deeply and relax again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "breathe deeply more",
+        "cn": "模拟释义：breathe deeply（扩展）",
+        "eg": "Take a moment to breathe deeply and relax again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "stay centered again",
+        "cn": "模拟释义：stay centered（扩展）",
+        "eg": "This pose helps you stay centered and calm again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "hold the pose more",
+        "cn": "模拟释义：hold the pose（扩展）",
+        "eg": "Hold the pose for five deep breaths again.",
+        "tags": "health & yoga"
+      },
+      {
+        "text": "hold the pose again",
+        "cn": "模拟释义：hold the pose（扩展）",
+        "eg": "Hold the pose for five deep breaths again.",
+        "tags": "health & yoga"
+      }
+    ]
+  },
+  {
+    "topic": "Emotions",
+    "items": [
+      {
+        "text": "bottle up feelings",
+        "cn": "模拟释义：bottle up 感到ings",
+        "eg": "Don't bottle up your feelings—talk to someone.",
+        "tags": "emotions"
+      },
+      {
+        "text": "feel at ease",
+        "cn": "模拟释义：感到 at ease",
+        "eg": "The teacher made everyone feel at ease.",
+        "tags": "emotions"
+      },
+      {
+        "text": "get overwhelmed",
+        "cn": "模拟释义：变得 overwhelmed",
+        "eg": "I get overwhelmed when too many things pile up.",
+        "tags": "emotions"
+      },
+      {
+        "text": "snap at someone",
+        "cn": "模拟释义：snap at someone",
+        "eg": "Sorry I snapped at you earlier—it wasn’t your fault.",
+        "tags": "emotions"
+      },
+      {
+        "text": "feel at ease soon",
+        "cn": "模拟释义：感到 at ease（扩展）",
+        "eg": "The teacher made everyone feel at ease again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "bottle up feelings soon",
+        "cn": "模拟释义：bottle up 感到ings（扩展）",
+        "eg": "Don't bottle up your feelings—talk to someone again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "snap at someone soon",
+        "cn": "模拟释义：snap at someone（扩展）",
+        "eg": "Sorry I snapped at you earlier—it wasn’t your fault again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "snap at someone more",
+        "cn": "模拟释义：snap at someone（扩展）",
+        "eg": "Sorry I snapped at you earlier—it wasn’t your fault again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "feel at ease more",
+        "cn": "模拟释义：感到 at ease（扩展）",
+        "eg": "The teacher made everyone feel at ease again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "snap at someone soon",
+        "cn": "模拟释义：snap at someone（扩展）",
+        "eg": "Sorry I snapped at you earlier—it wasn’t your fault again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "feel at ease more",
+        "cn": "模拟释义：感到 at ease（扩展）",
+        "eg": "The teacher made everyone feel at ease again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "get overwhelmed soon",
+        "cn": "模拟释义：变得 overwhelmed（扩展）",
+        "eg": "I get overwhelmed when too many things pile up again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "feel at ease soon",
+        "cn": "模拟释义：感到 at ease（扩展）",
+        "eg": "The teacher made everyone feel at ease again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "get overwhelmed more",
+        "cn": "模拟释义：变得 overwhelmed（扩展）",
+        "eg": "I get overwhelmed when too many things pile up again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "bottle up feelings soon",
+        "cn": "模拟释义：bottle up 感到ings（扩展）",
+        "eg": "Don't bottle up your feelings—talk to someone again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "snap at someone more",
+        "cn": "模拟释义：snap at someone（扩展）",
+        "eg": "Sorry I snapped at you earlier—it wasn’t your fault again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "snap at someone more",
+        "cn": "模拟释义：snap at someone（扩展）",
+        "eg": "Sorry I snapped at you earlier—it wasn’t your fault again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "get overwhelmed soon",
+        "cn": "模拟释义：变得 overwhelmed（扩展）",
+        "eg": "I get overwhelmed when too many things pile up again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "bottle up feelings soon",
+        "cn": "模拟释义：bottle up 感到ings（扩展）",
+        "eg": "Don't bottle up your feelings—talk to someone again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "snap at someone again",
+        "cn": "模拟释义：snap at someone（扩展）",
+        "eg": "Sorry I snapped at you earlier—it wasn’t your fault again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "get overwhelmed soon",
+        "cn": "模拟释义：变得 overwhelmed（扩展）",
+        "eg": "I get overwhelmed when too many things pile up again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "bottle up feelings again",
+        "cn": "模拟释义：bottle up 感到ings（扩展）",
+        "eg": "Don't bottle up your feelings—talk to someone again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "get overwhelmed soon",
+        "cn": "模拟释义：变得 overwhelmed（扩展）",
+        "eg": "I get overwhelmed when too many things pile up again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "feel at ease again",
+        "cn": "模拟释义：感到 at ease（扩展）",
+        "eg": "The teacher made everyone feel at ease again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "get overwhelmed more",
+        "cn": "模拟释义：变得 overwhelmed（扩展）",
+        "eg": "I get overwhelmed when too many things pile up again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "bottle up feelings soon",
+        "cn": "模拟释义：bottle up 感到ings（扩展）",
+        "eg": "Don't bottle up your feelings—talk to someone again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "get overwhelmed soon",
+        "cn": "模拟释义：变得 overwhelmed（扩展）",
+        "eg": "I get overwhelmed when too many things pile up again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "feel at ease more",
+        "cn": "模拟释义：感到 at ease（扩展）",
+        "eg": "The teacher made everyone feel at ease again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "bottle up feelings soon",
+        "cn": "模拟释义：bottle up 感到ings（扩展）",
+        "eg": "Don't bottle up your feelings—talk to someone again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "snap at someone soon",
+        "cn": "模拟释义：snap at someone（扩展）",
+        "eg": "Sorry I snapped at you earlier—it wasn’t your fault again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "snap at someone more",
+        "cn": "模拟释义：snap at someone（扩展）",
+        "eg": "Sorry I snapped at you earlier—it wasn’t your fault again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "feel at ease again",
+        "cn": "模拟释义：感到 at ease（扩展）",
+        "eg": "The teacher made everyone feel at ease again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "snap at someone more",
+        "cn": "模拟释义：snap at someone（扩展）",
+        "eg": "Sorry I snapped at you earlier—it wasn’t your fault again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "feel at ease more",
+        "cn": "模拟释义：感到 at ease（扩展）",
+        "eg": "The teacher made everyone feel at ease again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "bottle up feelings soon",
+        "cn": "模拟释义：bottle up 感到ings（扩展）",
+        "eg": "Don't bottle up your feelings—talk to someone again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "bottle up feelings soon",
+        "cn": "模拟释义：bottle up 感到ings（扩展）",
+        "eg": "Don't bottle up your feelings—talk to someone again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "get overwhelmed more",
+        "cn": "模拟释义：变得 overwhelmed（扩展）",
+        "eg": "I get overwhelmed when too many things pile up again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "snap at someone again",
+        "cn": "模拟释义：snap at someone（扩展）",
+        "eg": "Sorry I snapped at you earlier—it wasn’t your fault again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "get overwhelmed soon",
+        "cn": "模拟释义：变得 overwhelmed（扩展）",
+        "eg": "I get overwhelmed when too many things pile up again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "snap at someone soon",
+        "cn": "模拟释义：snap at someone（扩展）",
+        "eg": "Sorry I snapped at you earlier—it wasn’t your fault again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "feel at ease again",
+        "cn": "模拟释义：感到 at ease（扩展）",
+        "eg": "The teacher made everyone feel at ease again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "feel at ease soon",
+        "cn": "模拟释义：感到 at ease（扩展）",
+        "eg": "The teacher made everyone feel at ease again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "snap at someone soon",
+        "cn": "模拟释义：snap at someone（扩展）",
+        "eg": "Sorry I snapped at you earlier—it wasn’t your fault again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "snap at someone soon",
+        "cn": "模拟释义：snap at someone（扩展）",
+        "eg": "Sorry I snapped at you earlier—it wasn’t your fault again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "feel at ease soon",
+        "cn": "模拟释义：感到 at ease（扩展）",
+        "eg": "The teacher made everyone feel at ease again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "feel at ease soon",
+        "cn": "模拟释义：感到 at ease（扩展）",
+        "eg": "The teacher made everyone feel at ease again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "feel at ease soon",
+        "cn": "模拟释义：感到 at ease（扩展）",
+        "eg": "The teacher made everyone feel at ease again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "bottle up feelings soon",
+        "cn": "模拟释义：bottle up 感到ings（扩展）",
+        "eg": "Don't bottle up your feelings—talk to someone again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "snap at someone soon",
+        "cn": "模拟释义：snap at someone（扩展）",
+        "eg": "Sorry I snapped at you earlier—it wasn’t your fault again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "bottle up feelings more",
+        "cn": "模拟释义：bottle up 感到ings（扩展）",
+        "eg": "Don't bottle up your feelings—talk to someone again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "snap at someone soon",
+        "cn": "模拟释义：snap at someone（扩展）",
+        "eg": "Sorry I snapped at you earlier—it wasn’t your fault again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "get overwhelmed again",
+        "cn": "模拟释义：变得 overwhelmed（扩展）",
+        "eg": "I get overwhelmed when too many things pile up again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "bottle up feelings soon",
+        "cn": "模拟释义：bottle up 感到ings（扩展）",
+        "eg": "Don't bottle up your feelings—talk to someone again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "get overwhelmed again",
+        "cn": "模拟释义：变得 overwhelmed（扩展）",
+        "eg": "I get overwhelmed when too many things pile up again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "feel at ease soon",
+        "cn": "模拟释义：感到 at ease（扩展）",
+        "eg": "The teacher made everyone feel at ease again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "bottle up feelings soon",
+        "cn": "模拟释义：bottle up 感到ings（扩展）",
+        "eg": "Don't bottle up your feelings—talk to someone again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "snap at someone soon",
+        "cn": "模拟释义：snap at someone（扩展）",
+        "eg": "Sorry I snapped at you earlier—it wasn’t your fault again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "snap at someone soon",
+        "cn": "模拟释义：snap at someone（扩展）",
+        "eg": "Sorry I snapped at you earlier—it wasn’t your fault again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "feel at ease soon",
+        "cn": "模拟释义：感到 at ease（扩展）",
+        "eg": "The teacher made everyone feel at ease again.",
+        "tags": "emotions"
+      },
+      {
+        "text": "feel at ease again",
+        "cn": "模拟释义：感到 at ease（扩展）",
+        "eg": "The teacher made everyone feel at ease again.",
+        "tags": "emotions"
+      }
+    ]
+  }
+];
+
+// ======== 状态 ========
+let state = {
+  topicIndex: 0,
+  order: [], // indices of items in current topic
+  pointer: 0,
+  showBack: false,
+  reviewOnly: false,
+};
+
+const STORAGE_KEY = "native_en_progress_v1";
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+function saveProgress(progress) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+}
+
+const progress = loadProgress(); 
+// progress structure: { "<topicName>": { known: {index:true,...} } }
+
+// ======== 初始化 ========
+const topicSelect = document.getElementById("topicSelect");
+const topicList = document.getElementById("topicList");
+const topicNameEl = document.getElementById("topicName");
+const progressBar = document.getElementById("progressBar");
+const counterEl = document.getElementById("counter");
+
+const frontEl = document.getElementById("front");
+const ipaEl = document.getElementById("ipa");
+const meaningEl = document.getElementById("meaning");
+const egEl = document.getElementById("eg");
+const chipsEl = document.getElementById("chips");
+const cardEl = document.getElementById("card");
+
+const flipBtn = document.getElementById("flipBtn");
+const nextBtn = document.getElementById("nextBtn");
+const againBtn = document.getElementById("againBtn");
+const gotItBtn = document.getElementById("gotItBtn");
+const shuffleBtn = document.getElementById("shuffleBtn");
+const reviewToggle = document.getElementById("reviewToggle");
+const ttsBtn = document.getElementById("ttsBtn");
+
+function initTopics() {
+  topicSelect.innerHTML = "";
+  topicList.innerHTML = "";
+  DATA.forEach((t, idx) => {
+    const opt = document.createElement("option");
+    opt.value = idx; opt.textContent = t.topic;
+    topicSelect.appendChild(opt);
+
+    const item = document.createElement("div");
+    item.className = "topic-item";
+    item.innerHTML = `<div>${t.topic}</div><div class="tiny" id="tiny-${idx}"></div>`;
+    item.addEventListener("click", () => switchTopic(idx));
+    topicList.appendChild(item);
+  });
+  switchTopic(0);
+}
+
+function ensureProgressForTopic(tName) {
+  if (!progress[tName]) progress[tName] = { known: {} };
+}
+
+function updateSidebarActive() {
+  [...topicList.children].forEach((el, i) => {
+    el.classList.toggle("active", i === state.topicIndex);
+  });
+}
+
+function switchTopic(idx) {
+  state.topicIndex = idx;
+  state.pointer = 0;
+  state.showBack = false;
+  state.reviewOnly = state.reviewOnly || false;
+  topicSelect.value = String(idx);
+  updateSidebarActive();
+  prepareOrder();
+  render(); if (DATA && state.order.length > 0) { const item = DATA[state.topicIndex].items[state.order[state.pointer]]; speak(item.text); }
+  updateProgressBar();
+}
+
+function prepareOrder() {
+  const items = DATA[state.topicIndex].items;
+  const length = items.length;
+  state.order = [...Array(length).keys()]; // [0..n-1]
+  // if reviewOnly, filter to unknown
+  if (state.reviewOnly) {
+    const tName = DATA[state.topicIndex].topic;
+    ensureProgressForTopic(tName);
+    state.order = state.order.filter(i => !progress[tName].known[i]);
+  }
+  // if nothing to review, fallback to all
+  if (state.order.length === 0) {
+    state.order = [...Array(length).keys()];
+  }
+  state.pointer = 0;
+}
+
+function render() {
+  const topic = DATA[state.topicIndex];
+  topicNameEl.textContent = topic.topic;
+  updateTinyStats();
+
+  const total = state.order.length;
+  counterEl.textContent = `${Math.min(state.pointer+1,total)} / ${total}`;
+
+  if (total === 0) {
+    frontEl.textContent = "暂无卡片";
+    ipaEl.textContent = ""; meaningEl.textContent = ""; egEl.textContent = "";
+    chipsEl.innerHTML = "";
+    return;
+  }
+
+  const currentIndex = state.order[state.pointer];
+  const item = topic.items[currentIndex];
+
+  frontEl.textContent = item.text;
+  ipaEl.textContent = item.ipa || "";
+  meaningEl.textContent = state.showBack ? item.cn : "（按“显示/隐藏 释义”或空格显示）";
+  egEl.textContent = state.showBack ? item.eg : "";
+  chipsEl.innerHTML = (item.tags || []).map(t => `<span class="chip">${t}</span>`).join("");
+
+  // subtle visual flip state
+  cardEl.style.borderColor = state.showBack ? "#3b82f6" : "#1f2937";
+}
+
+function updateTinyStats() {
+  DATA.forEach((t, i) => {
+    const tiny = document.getElementById(`tiny-${i}`);
+    const total = t.items.length;
+    const known = Object.keys((progress[t.topic]||{known:{}}).known || {}).length;
+    tiny.textContent = `${known}/${total}`;
+  });
+}
+
+function updateProgressBar() {
+  const tName = DATA[state.topicIndex].topic;
+  ensureProgressForTopic(tName);
+  const total = DATA[state.topicIndex].items.length;
+  const known = Object.keys(progress[tName].known).length;
+  const pct = Math.round((known/total)*100);
+  progressBar.style.width = pct + "%";
+}
+
+function nextCard() {
+  const total = state.order.length;
+  state.pointer = (state.pointer + 1) % total;
+  state.showBack = false;
+  render(); if (DATA && state.order.length > 0) { const item = DATA[state.topicIndex].items[state.order[state.pointer]]; speak(item.text); }
+}
+
+function markKnown(known=true) {
+  const tName = DATA[state.topicIndex].topic;
+  ensureProgressForTopic(tName);
+  const currentIndex = state.order[state.pointer];
+  if (known) {
+    progress[tName].known[currentIndex] = true;
+  } else {
+    delete progress[tName].known[currentIndex];
+  }
+  saveProgress(progress);
+  updateProgressBar();
+  updateTinyStats();
+}
+
+flipBtn.addEventListener("click", () => { state.showBack = !state.showBack; render(); if (DATA && state.order.length > 0) { const item = DATA[state.topicIndex].items[state.order[state.pointer]]; speak(item.text); } });
+nextBtn.addEventListener("click", nextCard);
+againBtn.addEventListener("click", () => { markKnown(false); nextCard(); });
+gotItBtn.addEventListener("click", () => { markKnown(true); nextCard(); });
+shuffleBtn.addEventListener("click", () => { 
+  // Fisher–Yates
+  for (let i = state.order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [state.order[i], state.order[j]] = [state.order[j], state.order[i]];
+  }
+  state.pointer = 0; render(); if (DATA && state.order.length > 0) { const item = DATA[state.topicIndex].items[state.order[state.pointer]]; speak(item.text); }
+});
+reviewToggle.addEventListener("click", () => {
+  state.reviewOnly = !state.reviewOnly;
+  reviewToggle.textContent = state.reviewOnly ? "查看全部" : "仅看未掌握";
+  prepareOrder(); render(); if (DATA && state.order.length > 0) { const item = DATA[state.topicIndex].items[state.order[state.pointer]]; speak(item.text); }
+});
+topicSelect.addEventListener("change", e => switchTopic(Number(e.target.value)));
+
+// Keyboard shortcuts
+document.addEventListener("keydown", (e) => {
+  if (e.code === "Space") { e.preventDefault(); state.showBack = !state.showBack; render(); if (DATA && state.order.length > 0) { const item = DATA[state.topicIndex].items[state.order[state.pointer]]; speak(item.text); } }
+  else if (e.code === "ArrowRight") { nextCard(); }
+  else if (e.code === "ArrowLeft") { state.pointer = (state.pointer - 1 + state.order.length) % state.order.length; state.showBack = false; render(); if (DATA && state.order.length > 0) { const item = DATA[state.topicIndex].items[state.order[state.pointer]]; speak(item.text); } }
+});
+
+// TTS (Web Speech API)
+let voices = [];
+function speak(text) {
+  if (!("speechSynthesis" in window)) { alert("TTS 不被此浏览器支持"); return; }
+  const msg = new SpeechSynthesisUtterance(text);
+  const enVoice = voices.find(v => v.lang.startsWith("en"));
+  if (enVoice) msg.voice = enVoice;
+  msg.rate = 1.0; msg.pitch = 1.0;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(msg);
+}
+ttsBtn.addEventListener("click", () => {
+  const topic = DATA[state.topicIndex];
+  const item = topic.items[state.order[state.pointer]];
+  speak(item.text);
+});
+window.speechSynthesis?.addEventListener?.("voiceschanged", () => { voices = speechSynthesis.getVoices(); });
+voices = speechSynthesis?.getVoices?.() || [];
+
+// Boot
+initTopics();
+</script>
+</body>
+</html>
